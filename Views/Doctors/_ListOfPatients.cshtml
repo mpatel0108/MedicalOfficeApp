@@ -1,0 +1,36 @@
+﻿@model IEnumerable<MedicalOffice.Models.Patient>
+<br />
+<dl class="dl-horizontal">
+    <dt>
+        List of Patients
+    </dt>
+    <dd>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Patient
+                    </th>
+                    <th>
+                        Age (DOB)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <a asp-action="Index" asp-controller="PatientAppt" asp-route-PatientID="@item.ID">
+                                @Html.DisplayFor(modelItem => item.FullName)
+                            </a>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.AgeSummary)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </dd>
+</dl>

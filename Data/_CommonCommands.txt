@@ -1,0 +1,25 @@
+﻿Add-Migration -Context MedicalOfficeContext -o Data\MOMigrations Initial
+Update-Database -Context MedicalOfficeContext 
+Update-Database -Context ApplicationDbContext
+
+Put after create patient 
+    migrationBuilder.Sql(
+        @"
+        CREATE TRIGGER SetPatientTimestampOnUpdate
+        AFTER UPDATE ON Patients
+        BEGIN
+            UPDATE Patients
+            SET RowVersion = randomblob(8)
+            WHERE rowid = NEW.rowid;
+        END
+    ");
+    migrationBuilder.Sql(
+        @"
+        CREATE TRIGGER SetPatientTimestampOnInsert
+        AFTER INSERT ON Patients
+        BEGIN
+            UPDATE Patients
+            SET RowVersion = randomblob(8)
+            WHERE rowid = NEW.rowid;
+        END
+    ");

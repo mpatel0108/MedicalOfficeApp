@@ -1,0 +1,146 @@
+﻿@model IEnumerable<MedicalOffice.Models.Patient>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<form asp-action="Index" method="get">
+    <input type="hidden" name="sortDirection" value="@ViewData["sortDirection"]" />
+    <input type="hidden" name="sortField" value="@ViewData["sortField"]" />
+    <div class="form-horizontal">
+        <button class="btn btn-outline-primary" type="button" data-toggle="collapse" id="filterToggle" data-target="#collapseFilter" aria-expanded="false" aria-controls="collapseFilter">
+            Filter/Search
+        </button>
+        <div class="collapse @(ViewData["Filtering"])" id="collapseFilter">
+            <div class="card card-body bg-light">
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Select by Doctor:</label>
+                            @Html.DropDownList("DoctorID", null, "All Doctors", htmlAttributes: new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Search Patient Name:</label>
+                            @Html.TextBox("SearchString", null, new { @class = "form-control" })
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">Filter by Condition:</label>
+                            @Html.DropDownList("ConditionID", null, "All Conditions", htmlAttributes: new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="col-md-6  align-self-end">
+                        <div class="form-group">
+                            <input type="submit" name="actionButton" value="Filter" class="btn btn-outline-primary" />
+                            <a asp-action="Index" class="btn btn-outline-dark ">Clear</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>
+                    <input type="submit" name="actionButton" value="Patient" class="btn btn-link" />
+                </th>
+                <th>
+                    <input type="submit" name="actionButton" value="Age" class="btn btn-link" />
+                </th>
+                <th>
+                    <input type="submit" disabled="disabled" value="Medical History" class="btn btn-link" />
+                </th>
+                <th>
+                    <input type="submit" disabled="disabled" value="Med. Trial" class="btn btn-link" />
+                </th>
+                <th>
+                    <input type="submit" name="actionButton" value="Doctor" class="btn btn-link" />
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @{
+                            if (item.PatientPhoto != null)
+                            {
+                                if (item.PatientPhoto.PhotoContentThumb.Content != null && item.PatientPhoto.PhotoContentThumb.MimeType.Contains("image"))
+                                {
+                                    string imageBase64 = Convert.ToBase64String(item.PatientPhoto.PhotoContentThumb.Content);
+                                    string imageSrc = string.Format("data:" + item.PatientPhoto.PhotoContentThumb.MimeType + ";base64,{0}", imageBase64);
+                                    <img src="@imageSrc" alt="Profile Picture of @item.FullName" title="Profile Picture of @item.FullName" style="max-height: 100px; max-width: 120px" class="img-fluid rounded" />
+                                }
+                            }
+                        }
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FullName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Age)
+                    </td>
+                    <td>
+                        @{
+                            int condCount = item.PatientConditions.Count;
+                            if (condCount > 0)
+                            {
+                                string firstCond = item.PatientConditions.FirstOrDefault().Condition.ConditionName;
+                                if (condCount > 1)
+                                {
+                                    string condList = firstCond;
+                                    var c = item.PatientConditions.ToList();
+                                    for (int i = 1; i < condCount; i++)
+                                    {
+                                        condList += ", " + c[i].Condition.ConditionName;
+                                    }
+                                    <a tabindex="0" class="" role="button" data-toggle="popover"
+                                       data-trigger="focus" title="Conditions" data-placement="bottom" data-content="@condList">@firstCond... <span class="badge badge-info">@condCount</span></a>
+                                }
+                                else
+                                {
+                                    @firstCond
+                                }
+                            }
+                        }
+                        @*For help with Bootstrap Popovers see: https://getbootstrap.com/docs/4.3/components/popovers/*@
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.InTrial)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Doctor.FullName)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
+                        <a asp-action="Index" asp-controller="PatientAppt" asp-route-PatientID="@item.ID">Details</a> 
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <partial name="_PagingNavBar" />
+</form>
+@section Scripts {
+    <script type="text/javascript">
+        $(function () {
+            $('[data-toggle="popover"]').popover();
+        });
+    </script>
+}

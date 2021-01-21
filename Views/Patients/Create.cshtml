@@ -1,0 +1,155 @@
+﻿@model MedicalOffice.Models.Patient
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Patient</h4>
+<hr />
+<partial name="_AddDoctorModal" />
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="OHIP" class="control-label"></label>
+                <input asp-for="OHIP" class="form-control" />
+                <span asp-validation-for="OHIP" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FirstName" class="control-label"></label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MiddleName" class="control-label"></label>
+                <input asp-for="MiddleName" class="form-control" />
+                <span asp-validation-for="MiddleName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LastName" class="control-label"></label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DOB" class="control-label"></label>
+                <input asp-for="DOB" class="form-control" />
+                <span asp-validation-for="DOB" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ExpYrVisits" class="control-label"></label>
+                <input asp-for="ExpYrVisits" class="form-control" />
+                <span asp-validation-for="ExpYrVisits" class="text-danger"></span>
+            </div>
+            <div class="form-group custom-file mt-3 mb-4">
+                <label class="control-label custom-file-label">Picture File:</label>
+                <input type="file" class="custom-file-input" name="thePicture" /><br />
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label asp-for="Phone" class="control-label"></label>
+                <input asp-for="Phone" class="form-control" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="eMail" class="control-label"></label>
+                <input asp-for="eMail" class="form-control" />
+                <span asp-validation-for="eMail" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DoctorID" class="control-label"></label>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <button class="btn btn-outline-secondary" id="nowAddDoctor" data-toggle="modal" data-target="#addDoctorModal" type="button"><strong>+</strong></button>
+                    </div>
+                    <select asp-for="DoctorID" class="form-control" asp-items="ViewBag.DoctorID">
+                        <option value="">Select a Doctor</option>
+                    </select>
+                </div>
+                <span asp-validation-for="DoctorID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="MedicalTrialID" class="control-label"></label>
+                <select asp-for="MedicalTrialID" class="form-control" asp-items="ViewBag.MedicalTrialID">
+                    <option value="">None</option>
+                </select>
+                <span asp-validation-for="MedicalTrialID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">@Html.DisplayNameFor(model => model.PatientConditions)</label>
+                <div class="col-md-offset-1">
+                    <table>
+                        <tr>
+                            @{
+                                int cnt = 0;
+                                List<MedicalOffice.ViewModels.OptionVM> checkboxes = ViewBag.ConditionOptions;
+                                foreach (var checkbox in checkboxes)
+                                {
+                                    if (cnt++ % 3 == 0)
+                                    {
+                                    @:</tr><tr>
+                                    }
+                                    @:<td>
+                                        <input type="checkbox"
+                                               name="selectedOptions"
+                                               value="@checkbox.ID"
+                                               @(Html.Raw(checkbox.Assigned ? "checked=\"checked\"" : "")) />
+                                        @checkbox.DisplayText @:&nbsp;&nbsp;
+                                    @:</td>
+                                }
+                            @:</tr>
+                            }
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <input type="submit" value="Next" class="btn btn-primary" />
+                </div>
+            </div>
+        </div>
+    </form>
+<div>
+    <a href='@ViewData["returnURL"]'>Back to List of Patients</a>
+</div>
+
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+        <script src="~/js/refreshDDL.js"></script>
+        <script type="text/javascript">
+            // Add the following code if you want the name of the file appear on select
+            $(".custom-file-input").on("change", function () {
+                var fileName = $(this).val().split("\\").pop();
+                $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+            });
+            $('#submitCreate').click(function (event) {
+                event.preventDefault();
+                var form = $('#createDoctorForm');
+                if (form.valid()) {
+                    $.ajax({
+                        type: "POST",
+                        url: form.attr('action'),
+                        data: form.serialize(),
+                        success: function () {
+                            $('#addDoctorModal').modal('hide');
+                        },
+                        error: function () {
+                            alert("Create Failed.  There was a problem adding the record.");
+                        }
+                    });
+                }
+                return false;
+            });
+            $('#addDoctorModal').on('hide.bs.modal', function () {
+                $('#createDoctorForm').find("input[type=text], textarea, select").val("");//to clear the data in the popup
+                refreshDDL('DoctorID', 'Patients/GetDoctors', true, 'Select a Doctor', true);
+            });
+        </script>
+    }

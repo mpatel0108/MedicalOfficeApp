@@ -1,0 +1,13 @@
+﻿@model IEnumerable<MedicalOffice.Models.DoctorDocument>
+<br />
+<dl class="dl-horizontal">
+    <dt>
+        <strong>List of Documents</strong>
+    </dt>
+    <dd>
+        @foreach (var item in Model)
+        {
+            <a asp-action="Download" asp-route-id="@item.ID">@item.FileName</a> <br />
+        }
+    </dd>
+</dl>

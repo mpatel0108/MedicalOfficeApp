@@ -1,0 +1,13 @@
+﻿@model IEnumerable<MedicalOffice.Models.DoctorSpecialty>
+<br />
+<dl class="dl-horizontal">
+    <dt>
+        <strong>List of Specialties</strong>
+    </dt>
+    <dd>
+        @foreach (var item in Model)
+        {
+            @item.Specialty.SpecialtyName <br />
+        }
+    </dd>
+</dl>
